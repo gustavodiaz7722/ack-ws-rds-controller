@@ -82,8 +82,6 @@ rules:
 - apiGroups:
   - iam.services.k8s.aws
   resources:
-  - instanceprofiles
-  - instanceprofiles/status
   - roles
   - roles/status
   verbs:

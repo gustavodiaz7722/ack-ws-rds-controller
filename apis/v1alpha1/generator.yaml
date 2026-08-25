@@ -211,11 +211,6 @@ resources:
           resource: SecurityGroup
           service_name: ec2
           path: Status.ID
-      DomainIAMRoleName:
-        references:
-          resource: Role
-          service_name: iam
-          path: Spec.Name
       SnapshotIdentifier:
         from:
           operation: RestoreDBClusterFromSnapshot
@@ -489,16 +484,6 @@ resources:
         references:
           resource: DBCluster
           path: Spec.DBClusterIdentifier
-      DomainIAMRoleName:
-        references:
-          resource: Role
-          service_name: iam
-          path: Spec.Name
-      CustomIAMInstanceProfile:
-        references:
-          resource: InstanceProfile
-          service_name: iam
-          path: Spec.Name
       # Used by restore db instance from db snapshot
       DBSnapshotIdentifier:
         from:
@@ -511,9 +496,6 @@ resources:
         from:
           operation: RestoreDBInstanceFromDBSnapshot
           path: DBClusterSnapshotIdentifier
-        references:
-          resource: DBClusterSnapshot
-          path: Spec.DBClusterSnapshotIdentifier
       UseDefaultProcessorFeatures:
         from:
           operation: RestoreDBInstanceFromDBSnapshot

@@ -1742,11 +1742,6 @@ func (in *DBClusterSpec) DeepCopyInto(out *DBClusterSpec) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.DomainIAMRoleRef != nil {
-		in, out := &in.DomainIAMRoleRef, &out.DomainIAMRoleRef
-		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
-		(*in).DeepCopyInto(*out)
-	}
 	if in.EnableCloudwatchLogsExports != nil {
 		in, out := &in.EnableCloudwatchLogsExports, &out.EnableCloudwatchLogsExports
 		*out = make([]*string, len(*in))
@@ -3226,11 +3221,6 @@ func (in *DBInstanceSpec) DeepCopyInto(out *DBInstanceSpec) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.CustomIAMInstanceProfileRef != nil {
-		in, out := &in.CustomIAMInstanceProfileRef, &out.CustomIAMInstanceProfileRef
-		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
-		(*in).DeepCopyInto(*out)
-	}
 	if in.DBClusterIdentifier != nil {
 		in, out := &in.DBClusterIdentifier, &out.DBClusterIdentifier
 		*out = new(string)
@@ -3245,11 +3235,6 @@ func (in *DBInstanceSpec) DeepCopyInto(out *DBInstanceSpec) {
 		in, out := &in.DBClusterSnapshotIdentifier, &out.DBClusterSnapshotIdentifier
 		*out = new(string)
 		**out = **in
-	}
-	if in.DBClusterSnapshotIdentifierRef != nil {
-		in, out := &in.DBClusterSnapshotIdentifierRef, &out.DBClusterSnapshotIdentifierRef
-		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
-		(*in).DeepCopyInto(*out)
 	}
 	if in.DBInstanceClass != nil {
 		in, out := &in.DBInstanceClass, &out.DBInstanceClass
@@ -3320,11 +3305,6 @@ func (in *DBInstanceSpec) DeepCopyInto(out *DBInstanceSpec) {
 		in, out := &in.DomainIAMRoleName, &out.DomainIAMRoleName
 		*out = new(string)
 		**out = **in
-	}
-	if in.DomainIAMRoleRef != nil {
-		in, out := &in.DomainIAMRoleRef, &out.DomainIAMRoleRef
-		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
-		(*in).DeepCopyInto(*out)
 	}
 	if in.EnableCloudwatchLogsExports != nil {
 		in, out := &in.EnableCloudwatchLogsExports, &out.EnableCloudwatchLogsExports

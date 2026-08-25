@@ -206,9 +206,6 @@ func newResourceDelta(
 			delta.Add("Spec.DomainIAMRoleName", a.ko.Spec.DomainIAMRoleName, b.ko.Spec.DomainIAMRoleName)
 		}
 	}
-	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.DomainIAMRoleRef, b.ko.Spec.DomainIAMRoleRef) {
-		delta.Add("Spec.DomainIAMRoleRef", a.ko.Spec.DomainIAMRoleRef, b.ko.Spec.DomainIAMRoleRef)
-	}
 	if len(a.ko.Spec.EnableCloudwatchLogsExports) != len(b.ko.Spec.EnableCloudwatchLogsExports) {
 		delta.Add("Spec.EnableCloudwatchLogsExports", a.ko.Spec.EnableCloudwatchLogsExports, b.ko.Spec.EnableCloudwatchLogsExports)
 	} else if len(a.ko.Spec.EnableCloudwatchLogsExports) > 0 {

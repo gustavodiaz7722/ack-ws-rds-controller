@@ -227,8 +227,7 @@ type DBInstanceSpec struct {
 	// For the list of permissions required for the IAM role, see Configure IAM
 	// and your VPC (https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/custom-setup-orcl.html#custom-setup-orcl.iam-vpc)
 	// in the Amazon RDS User Guide.
-	CustomIAMInstanceProfile    *string                                  `json:"customIAMInstanceProfile,omitempty"`
-	CustomIAMInstanceProfileRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"customIAMInstanceProfileRef,omitempty"`
+	CustomIAMInstanceProfile *string `json:"customIAMInstanceProfile,omitempty"`
 	// The identifier of the DB cluster that this DB instance will belong to.
 	//
 	// This setting doesn't apply to RDS Custom DB instances.
@@ -252,8 +251,7 @@ type DBInstanceSpec struct {
 	//     the DBClusterSnapshotIdentifier must be the ARN of the shared snapshot.
 	//
 	//   - Can't be the identifier of an Aurora DB cluster snapshot.
-	DBClusterSnapshotIdentifier    *string                                  `json:"dbClusterSnapshotIdentifier,omitempty"`
-	DBClusterSnapshotIdentifierRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"dbClusterSnapshotIdentifierRef,omitempty"`
+	DBClusterSnapshotIdentifier *string `json:"dbClusterSnapshotIdentifier,omitempty"`
 	// The compute and memory capacity of the DB instance, for example db.m5.large.
 	// Not all DB instance classes are available in all Amazon Web Services Regions,
 	// or for all database engines. For the full list of DB instance classes, and
@@ -482,8 +480,7 @@ type DBInstanceSpec struct {
 	//   - Amazon Aurora (The domain is managed by the DB cluster.)
 	//
 	//   - RDS Custom
-	DomainIAMRoleName *string                                  `json:"domainIAMRoleName,omitempty"`
-	DomainIAMRoleRef  *ackv1alpha1.AWSResourceReferenceWrapper `json:"domainIAMRoleRef,omitempty"`
+	DomainIAMRoleName *string `json:"domainIAMRoleName,omitempty"`
 	// The list of log types to enable for exporting to CloudWatch Logs. For more
 	// information, see Publishing Database Logs to Amazon CloudWatch Logs (https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.html#USER_LogAccess.Procedural.UploadtoCloudWatch)
 	// in the Amazon RDS User Guide.

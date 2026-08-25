@@ -92,9 +92,6 @@ func newResourceDelta(
 			delta.Add("Spec.CustomIAMInstanceProfile", a.ko.Spec.CustomIAMInstanceProfile, b.ko.Spec.CustomIAMInstanceProfile)
 		}
 	}
-	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.CustomIAMInstanceProfileRef, b.ko.Spec.CustomIAMInstanceProfileRef) {
-		delta.Add("Spec.CustomIAMInstanceProfileRef", a.ko.Spec.CustomIAMInstanceProfileRef, b.ko.Spec.CustomIAMInstanceProfileRef)
-	}
 	if ackcompare.HasNilDifference(a.ko.Spec.DBClusterIdentifier, b.ko.Spec.DBClusterIdentifier) {
 		delta.Add("Spec.DBClusterIdentifier", a.ko.Spec.DBClusterIdentifier, b.ko.Spec.DBClusterIdentifier)
 	} else if a.ko.Spec.DBClusterIdentifier != nil && b.ko.Spec.DBClusterIdentifier != nil {
@@ -111,9 +108,6 @@ func newResourceDelta(
 		if *a.ko.Spec.DBClusterSnapshotIdentifier != *b.ko.Spec.DBClusterSnapshotIdentifier {
 			delta.Add("Spec.DBClusterSnapshotIdentifier", a.ko.Spec.DBClusterSnapshotIdentifier, b.ko.Spec.DBClusterSnapshotIdentifier)
 		}
-	}
-	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.DBClusterSnapshotIdentifierRef, b.ko.Spec.DBClusterSnapshotIdentifierRef) {
-		delta.Add("Spec.DBClusterSnapshotIdentifierRef", a.ko.Spec.DBClusterSnapshotIdentifierRef, b.ko.Spec.DBClusterSnapshotIdentifierRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.DBInstanceClass, b.ko.Spec.DBInstanceClass) {
 		delta.Add("Spec.DBInstanceClass", a.ko.Spec.DBInstanceClass, b.ko.Spec.DBInstanceClass)
@@ -179,9 +173,6 @@ func newResourceDelta(
 		if *a.ko.Spec.DomainIAMRoleName != *b.ko.Spec.DomainIAMRoleName {
 			delta.Add("Spec.DomainIAMRoleName", a.ko.Spec.DomainIAMRoleName, b.ko.Spec.DomainIAMRoleName)
 		}
-	}
-	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.DomainIAMRoleRef, b.ko.Spec.DomainIAMRoleRef) {
-		delta.Add("Spec.DomainIAMRoleRef", a.ko.Spec.DomainIAMRoleRef, b.ko.Spec.DomainIAMRoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.EnableCustomerOwnedIP, b.ko.Spec.EnableCustomerOwnedIP) {
 		delta.Add("Spec.EnableCustomerOwnedIP", a.ko.Spec.EnableCustomerOwnedIP, b.ko.Spec.EnableCustomerOwnedIP)

@@ -190,8 +190,7 @@ type DBClusterSpec struct {
 	// The name of the IAM role to use when making API calls to the Directory Service.
 	//
 	// Valid for Cluster Type: Aurora DB clusters only
-	DomainIAMRoleName *string                                  `json:"domainIAMRoleName,omitempty"`
-	DomainIAMRoleRef  *ackv1alpha1.AWSResourceReferenceWrapper `json:"domainIAMRoleRef,omitempty"`
+	DomainIAMRoleName *string `json:"domainIAMRoleName,omitempty"`
 	// The list of log types that need to be enabled for exporting to CloudWatch
 	// Logs.
 	//
