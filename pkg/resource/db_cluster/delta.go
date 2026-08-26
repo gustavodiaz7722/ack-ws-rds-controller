@@ -506,6 +506,9 @@ func newResourceDelta(
 			delta.Add("Spec.SourceDBClusterIdentifier", a.ko.Spec.SourceDBClusterIdentifier, b.ko.Spec.SourceDBClusterIdentifier)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.SourceDBClusterIdentifierRef, b.ko.Spec.SourceDBClusterIdentifierRef) {
+		delta.Add("Spec.SourceDBClusterIdentifierRef", a.ko.Spec.SourceDBClusterIdentifierRef, b.ko.Spec.SourceDBClusterIdentifierRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.SourceRegion, b.ko.Spec.SourceRegion) {
 		delta.Add("Spec.SourceRegion", a.ko.Spec.SourceRegion, b.ko.Spec.SourceRegion)
 	} else if a.ko.Spec.SourceRegion != nil && b.ko.Spec.SourceRegion != nil {

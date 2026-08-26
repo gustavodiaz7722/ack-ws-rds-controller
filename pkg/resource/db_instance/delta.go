@@ -99,6 +99,9 @@ func newResourceDelta(
 			delta.Add("Spec.DBClusterIdentifier", a.ko.Spec.DBClusterIdentifier, b.ko.Spec.DBClusterIdentifier)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.DBClusterIdentifierRef, b.ko.Spec.DBClusterIdentifierRef) {
+		delta.Add("Spec.DBClusterIdentifierRef", a.ko.Spec.DBClusterIdentifierRef, b.ko.Spec.DBClusterIdentifierRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.DBClusterSnapshotIdentifier, b.ko.Spec.DBClusterSnapshotIdentifier) {
 		delta.Add("Spec.DBClusterSnapshotIdentifier", a.ko.Spec.DBClusterSnapshotIdentifier, b.ko.Spec.DBClusterSnapshotIdentifier)
 	} else if a.ko.Spec.DBClusterSnapshotIdentifier != nil && b.ko.Spec.DBClusterSnapshotIdentifier != nil {
@@ -136,6 +139,9 @@ func newResourceDelta(
 		if *a.ko.Spec.DBSnapshotIdentifier != *b.ko.Spec.DBSnapshotIdentifier {
 			delta.Add("Spec.DBSnapshotIdentifier", a.ko.Spec.DBSnapshotIdentifier, b.ko.Spec.DBSnapshotIdentifier)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.DBSnapshotIdentifierRef, b.ko.Spec.DBSnapshotIdentifierRef) {
+		delta.Add("Spec.DBSnapshotIdentifierRef", a.ko.Spec.DBSnapshotIdentifierRef, b.ko.Spec.DBSnapshotIdentifierRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.DBSubnetGroupName, b.ko.Spec.DBSubnetGroupName) {
 		delta.Add("Spec.DBSubnetGroupName", a.ko.Spec.DBSubnetGroupName, b.ko.Spec.DBSubnetGroupName)
@@ -354,6 +360,9 @@ func newResourceDelta(
 		if *a.ko.Spec.SourceDBInstanceIdentifier != *b.ko.Spec.SourceDBInstanceIdentifier {
 			delta.Add("Spec.SourceDBInstanceIdentifier", a.ko.Spec.SourceDBInstanceIdentifier, b.ko.Spec.SourceDBInstanceIdentifier)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.SourceDBInstanceIdentifierRef, b.ko.Spec.SourceDBInstanceIdentifierRef) {
+		delta.Add("Spec.SourceDBInstanceIdentifierRef", a.ko.Spec.SourceDBInstanceIdentifierRef, b.ko.Spec.SourceDBInstanceIdentifierRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.SourceRegion, b.ko.Spec.SourceRegion) {
 		delta.Add("Spec.SourceRegion", a.ko.Spec.SourceRegion, b.ko.Spec.SourceRegion)

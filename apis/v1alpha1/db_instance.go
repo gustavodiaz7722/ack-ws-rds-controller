@@ -231,7 +231,8 @@ type DBInstanceSpec struct {
 	// The identifier of the DB cluster that this DB instance will belong to.
 	//
 	// This setting doesn't apply to RDS Custom DB instances.
-	DBClusterIdentifier *string `json:"dbClusterIdentifier,omitempty"`
+	DBClusterIdentifier    *string                                  `json:"dbClusterIdentifier,omitempty"`
+	DBClusterIdentifierRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"dbClusterIdentifierRef,omitempty"`
 	// The identifier for the Multi-AZ DB cluster snapshot to restore from.
 	//
 	// For more information on Multi-AZ DB clusters, see Multi-AZ DB cluster deployments
@@ -430,7 +431,8 @@ type DBInstanceSpec struct {
 	//
 	//   - If you are restoring from a shared manual DB snapshot, the DBSnapshotIdentifier
 	//     must be the ARN of the shared DB snapshot.
-	DBSnapshotIdentifier *string `json:"dbSnapshotIdentifier,omitempty"`
+	DBSnapshotIdentifier    *string                                  `json:"dbSnapshotIdentifier,omitempty"`
+	DBSnapshotIdentifierRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"dbSnapshotIdentifierRef,omitempty"`
 	// A DB subnet group to associate with this DB instance.
 	//
 	// Constraints:
@@ -1118,7 +1120,8 @@ type DBInstanceSpec struct {
 	//     see Constructing an ARN for Amazon RDS (https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Tagging.ARN.html#USER_Tagging.ARN.Constructing)
 	//     in the Amazon RDS User Guide. This doesn't apply to SQL Server or RDS
 	//     Custom, which don't support cross-Region replicas.
-	SourceDBInstanceIdentifier *string `json:"sourceDBInstanceIdentifier,omitempty"`
+	SourceDBInstanceIdentifier    *string                                  `json:"sourceDBInstanceIdentifier,omitempty"`
+	SourceDBInstanceIdentifierRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"sourceDBInstanceIdentifierRef,omitempty"`
 	// SourceRegion is the source region where the resource exists. This is not
 	// sent over the wire and is only used for presigning. This value should always
 	// have the same region as the source ARN.

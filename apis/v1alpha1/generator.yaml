@@ -219,6 +219,9 @@ resources:
         from:
           operation: RestoreDBClusterToPointInTime
           path: SourceDBClusterIdentifier
+        references:
+          resource: DBCluster
+          path: Spec.DBClusterIdentifier
       RestoreType:
         from:
           operation: RestoreDBClusterToPointInTime
@@ -477,11 +480,18 @@ resources:
       CopyTagsToSnapshot:
         late_initialize:
           skip_incomplete_check: {}
+      DBClusterIdentifier:
+        references:
+          resource: DBCluster
+          path: Spec.DBClusterIdentifier
       # Used by restore db instance from db snapshot
       DBSnapshotIdentifier:
         from:
           operation: RestoreDBInstanceFromDBSnapshot
           path: DBSnapshotIdentifier
+        references:
+          resource: DBSnapshot
+          path: Spec.DBSnapshotIdentifier
       DBClusterSnapshotIdentifier:
         from:
           operation: RestoreDBInstanceFromDBSnapshot
@@ -495,6 +505,9 @@ resources:
         from:
           operation: CreateDBInstanceReadReplica
           path: SourceDBInstanceIdentifier
+        references:
+          resource: DBInstance
+          path: Spec.DBInstanceIdentifier
       DestinationRegion:
         set:
           - ignore: all
@@ -547,6 +560,10 @@ resources:
     fields:
       GlobalClusterIdentifier:
         is_primary_key: true
+      SourceDBClusterIdentifier:
+        references:
+          resource: DBCluster
+          path: Status.ACKResourceMetadata.ARN
 
   DBParameterGroup:
     renames:
@@ -655,6 +672,16 @@ resources:
           resource: Role
           service_name: iam
           path: Status.ACKResourceMetadata.ARN
+      VpcSecurityGroupIds:
+        references:
+          resource: SecurityGroup
+          service_name: ec2
+          path: Status.ID
+      VpcSubnetIds:
+        references:
+          resource: Subnet
+          service_name: ec2
+          path: Status.SubnetID
     renames:
       operations:
         CreateDBProxy:
@@ -736,6 +763,10 @@ resources:
         references:
           resource: DBCluster
           path: Spec.DBClusterIdentifier
+      StaticMembers:
+        references:
+          resource: DBInstance
+          path: Spec.DBInstanceIdentifier
       Tags:
         compare:
           # We have a custom comparison function...

@@ -708,7 +708,8 @@ type DBClusterSpec struct {
 	//   - Must match the identifier of an existing DBCluster.
 	//
 	// Valid for: Aurora DB clusters and Multi-AZ DB clusters
-	SourceDBClusterIdentifier *string `json:"sourceDBClusterIdentifier,omitempty"`
+	SourceDBClusterIdentifier    *string                                  `json:"sourceDBClusterIdentifier,omitempty"`
+	SourceDBClusterIdentifierRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"sourceDBClusterIdentifierRef,omitempty"`
 	// SourceRegion is the source region where the resource exists. This is not
 	// sent over the wire and is only used for presigning. This value should always
 	// have the same region as the source ARN.

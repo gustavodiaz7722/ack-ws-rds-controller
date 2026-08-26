@@ -56,8 +56,16 @@ import (
 func (rm *resourceManager) ClearResolvedReferences(res acktypes.AWSResource) acktypes.AWSResource {
 	ko := rm.concreteResource(res).ko.DeepCopy()
 
+	if ko.Spec.DBClusterIdentifierRef != nil {
+		ko.Spec.DBClusterIdentifier = nil
+	}
+
 	if ko.Spec.DBParameterGroupRef != nil {
 		ko.Spec.DBParameterGroupName = nil
+	}
+
+	if ko.Spec.DBSnapshotIdentifierRef != nil {
+		ko.Spec.DBSnapshotIdentifier = nil
 	}
 
 	if ko.Spec.DBSubnetGroupRef != nil {
@@ -78,6 +86,10 @@ func (rm *resourceManager) ClearResolvedReferences(res acktypes.AWSResource) ack
 
 	if ko.Spec.PerformanceInsightsKMSKeyRef != nil {
 		ko.Spec.PerformanceInsightsKMSKeyID = nil
+	}
+
+	if ko.Spec.SourceDBInstanceIdentifierRef != nil {
+		ko.Spec.SourceDBInstanceIdentifier = nil
 	}
 
 	if len(ko.Spec.VPCSecurityGroupRefs) > 0 {
@@ -103,7 +115,19 @@ func (rm *resourceManager) ResolveReferences(
 
 	resourceHasReferences := false
 	err := validateReferenceFields(ko)
+	if fieldHasReferences, err := rm.resolveReferenceForDBClusterIdentifier(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
 	if fieldHasReferences, err := rm.resolveReferenceForDBParameterGroupName(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForDBSnapshotIdentifier(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
@@ -139,6 +163,12 @@ func (rm *resourceManager) ResolveReferences(
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
 	}
 
+	if fieldHasReferences, err := rm.resolveReferenceForSourceDBInstanceIdentifier(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
 	if fieldHasReferences, err := rm.resolveReferenceForVPCSecurityGroupIDs(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
@@ -152,8 +182,16 @@ func (rm *resourceManager) ResolveReferences(
 // identifier field.
 func validateReferenceFields(ko *svcapitypes.DBInstance) error {
 
+	if ko.Spec.DBClusterIdentifierRef != nil && ko.Spec.DBClusterIdentifier != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("DBClusterIdentifier", "DBClusterIdentifierRef")
+	}
+
 	if ko.Spec.DBParameterGroupRef != nil && ko.Spec.DBParameterGroupName != nil {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("DBParameterGroupName", "DBParameterGroupRef")
+	}
+
+	if ko.Spec.DBSnapshotIdentifierRef != nil && ko.Spec.DBSnapshotIdentifier != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("DBSnapshotIdentifier", "DBSnapshotIdentifierRef")
 	}
 
 	if ko.Spec.DBSubnetGroupRef != nil && ko.Spec.DBSubnetGroupName != nil {
@@ -176,8 +214,103 @@ func validateReferenceFields(ko *svcapitypes.DBInstance) error {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("PerformanceInsightsKMSKeyID", "PerformanceInsightsKMSKeyRef")
 	}
 
+	if ko.Spec.SourceDBInstanceIdentifierRef != nil && ko.Spec.SourceDBInstanceIdentifier != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("SourceDBInstanceIdentifier", "SourceDBInstanceIdentifierRef")
+	}
+
 	if len(ko.Spec.VPCSecurityGroupRefs) > 0 && len(ko.Spec.VPCSecurityGroupIDs) > 0 {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("VPCSecurityGroupIDs", "VPCSecurityGroupRefs")
+	}
+	return nil
+}
+
+// resolveReferenceForDBClusterIdentifier reads the resource referenced
+// from DBClusterIdentifierRef field and sets the DBClusterIdentifier
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForDBClusterIdentifier(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.DBInstance,
+) (hasReferences bool, err error) {
+	if ko.Spec.DBClusterIdentifierRef != nil && ko.Spec.DBClusterIdentifierRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.DBClusterIdentifierRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: DBClusterIdentifierRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &svcapitypes.DBCluster{}
+		if err := getReferencedResourceState_DBCluster(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.DBClusterIdentifier = (*string)(obj.Spec.DBClusterIdentifier)
+	}
+
+	return hasReferences, nil
+}
+
+// getReferencedResourceState_DBCluster looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_DBCluster(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *svcapitypes.DBCluster,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"DBCluster",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"DBCluster",
+			namespace, name)
+	}
+	var refResourceSynced bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"DBCluster",
+			namespace, name)
+	}
+	if obj.Spec.DBClusterIdentifier == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"DBCluster",
+			namespace, name,
+			"Spec.DBClusterIdentifier")
 	}
 	return nil
 }
@@ -269,6 +402,97 @@ func getReferencedResourceState_DBParameterGroup(
 			"DBParameterGroup",
 			namespace, name,
 			"Spec.Name")
+	}
+	return nil
+}
+
+// resolveReferenceForDBSnapshotIdentifier reads the resource referenced
+// from DBSnapshotIdentifierRef field and sets the DBSnapshotIdentifier
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForDBSnapshotIdentifier(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.DBInstance,
+) (hasReferences bool, err error) {
+	if ko.Spec.DBSnapshotIdentifierRef != nil && ko.Spec.DBSnapshotIdentifierRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.DBSnapshotIdentifierRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: DBSnapshotIdentifierRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &svcapitypes.DBSnapshot{}
+		if err := getReferencedResourceState_DBSnapshot(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.DBSnapshotIdentifier = (*string)(obj.Spec.DBSnapshotIdentifier)
+	}
+
+	return hasReferences, nil
+}
+
+// getReferencedResourceState_DBSnapshot looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_DBSnapshot(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *svcapitypes.DBSnapshot,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"DBSnapshot",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"DBSnapshot",
+			namespace, name)
+	}
+	var refResourceSynced bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"DBSnapshot",
+			namespace, name)
+	}
+	if obj.Spec.DBSnapshotIdentifier == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"DBSnapshot",
+			namespace, name,
+			"Spec.DBSnapshotIdentifier")
 	}
 	return nil
 }
@@ -618,6 +842,97 @@ func (rm *resourceManager) resolveReferenceForPerformanceInsightsKMSKeyID(
 	}
 
 	return hasReferences, nil
+}
+
+// resolveReferenceForSourceDBInstanceIdentifier reads the resource referenced
+// from SourceDBInstanceIdentifierRef field and sets the SourceDBInstanceIdentifier
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForSourceDBInstanceIdentifier(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.DBInstance,
+) (hasReferences bool, err error) {
+	if ko.Spec.SourceDBInstanceIdentifierRef != nil && ko.Spec.SourceDBInstanceIdentifierRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.SourceDBInstanceIdentifierRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: SourceDBInstanceIdentifierRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &svcapitypes.DBInstance{}
+		if err := getReferencedResourceState_DBInstance(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.SourceDBInstanceIdentifier = (*string)(obj.Spec.DBInstanceIdentifier)
+	}
+
+	return hasReferences, nil
+}
+
+// getReferencedResourceState_DBInstance looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_DBInstance(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *svcapitypes.DBInstance,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"DBInstance",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"DBInstance",
+			namespace, name)
+	}
+	var refResourceSynced bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"DBInstance",
+			namespace, name)
+	}
+	if obj.Spec.DBInstanceIdentifier == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"DBInstance",
+			namespace, name,
+			"Spec.DBInstanceIdentifier")
+	}
+	return nil
 }
 
 // resolveReferenceForVPCSecurityGroupIDs reads the resource referenced
